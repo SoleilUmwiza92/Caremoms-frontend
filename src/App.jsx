@@ -7,17 +7,15 @@ import Chat from "./components/Chat.jsx";
 
 import "./App.css";
 
-// Use environment variable for API URL
+
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://caremoms.up.railway.app/api";
 
-console.log('API Base URL:', API_BASE_URL); // Debug log
+console.log("API Base URL:", API_BASE_URL);
 
 function App() {
   const [nickname, setNickname] = useState("");
   const [tempName, setTempName] = useState("");
   const [messages, setMessages] = useState([]);
-
-const API_BASE_URL = "https://caremoms.up.railway.app/api";
 
   // Poll messages
   useEffect(() => {
@@ -25,7 +23,7 @@ const API_BASE_URL = "https://caremoms.up.railway.app/api";
 
     const fetchMessages = async () => {
       try {
-        const res = await fetch(API);
+        const res = await fetch(`${API_BASE_URL}/chat`);
         const data = await res.json();
         setMessages(data);
       } catch (err) {
@@ -33,27 +31,24 @@ const API_BASE_URL = "https://caremoms.up.railway.app/api";
       }
     };
 
-    fetchMessages();              // Load immediately
-    const interval = setInterval(fetchMessages, 1500); // Poll
-
+    fetchMessages(); // Load immediately
+    const interval = setInterval(fetchMessages, 1500);
     return () => clearInterval(interval);
   }, [nickname]);
 
   // Send message
   const sendMessage = async (msgText) => {
     try {
-      const res = await fetch(API, {
+      const res = await fetch(`${API_BASE_URL}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nickname: nickname,
+          nickname,
           content: msgText,
         }),
       });
 
-      if (!res.ok) return false;
-
-      return true;
+      return res.ok;
     } catch (err) {
       console.error("Send error:", err);
       return false;
