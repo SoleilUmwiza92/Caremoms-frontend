@@ -22,16 +22,16 @@ jobs:
         with:
           node-version: 18
           cache: "npm"
-          cache-dependency-path: "caremoms-frontend/package-lock.json"
+          cache-dependency-path: "Caremoms-frontend/package-lock.json"
 
       - name: Install dependencies
-        working-directory: ./caremoms-frontend
+        working-directory: ./Caremoms-frontend
         run: npm ci
 
       - name: Run tests
-        working-directory: ./caremoms-frontend
+        working-directory: ./Caremoms-frontend
         run: npm test -- --watchAll=false
 
       - name: Build frontend
-        working-directory: ./caremoms-frontend
+        working-directory: ./Caremoms-frontend
         run: npm run build
