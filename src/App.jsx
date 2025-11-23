@@ -8,7 +8,7 @@ import Chat from "./components/Chat.jsx";
 import "./App.css";
 
 // Use environment variable for API URL
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api/chat';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://caremoms.up.railway.app/api";
 
 console.log('API Base URL:', API_BASE_URL); // Debug log
 
@@ -17,7 +17,7 @@ function App() {
   const [tempName, setTempName] = useState("");
   const [messages, setMessages] = useState([]);
 
-  const API = "http://localhost:8080/api/chat";
+const API_BASE_URL = "https://caremoms.up.railway.app/api";
 
   // Poll messages
   useEffect(() => {
