@@ -7,6 +7,11 @@ import Chat from "./components/Chat.jsx";
 
 import "./App.css";
 
+// Use environment variable for API URL
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api/chat';
+
+console.log('API Base URL:', API_BASE_URL); // Debug log
+
 function App() {
   const [nickname, setNickname] = useState("");
   const [tempName, setTempName] = useState("");
