@@ -1,86 +1,30 @@
-import React, { useState, useEffect } from "react";
-import { TextField } from "@mui/material";
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './auth/AuthProvider';
+import ProtectedRoute from './auth/ProtectedRoute';
 
-import Header from "./components/Header.jsx";
-import Sidebar from "./components/Sidebar.jsx";
-import Chat from "./components/Chat.jsx";
+import Login from './pages/Login';
+import Profile from './pages/Profile';
+// import Feed from './pages/Feed'; // when you have it
 
-import "./App.css";
-
-
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "https://caremoms.up.railway.app/api";
-
-console.log("API Base URL:", API_BASE_URL);
-
-function App() {
-  const [nickname, setNickname] = useState("");
-  const [tempName, setTempName] = useState("");
-  const [messages, setMessages] = useState([]);
-
-  // Poll messages
-  useEffect(() => {
-    if (!nickname) return;
-
-    const fetchMessages = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/chat`);
-        const data = await res.json();
-        setMessages(data);
-      } catch (err) {
-        console.error("Polling error:", err);
-      }
-    };
-
-    fetchMessages(); // Load immediately
-    const interval = setInterval(fetchMessages, 1500);
-    return () => clearInterval(interval);
-  }, [nickname]);
-
-  // Send message
-  const sendMessage = async (msgText) => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nickname,
-          content: msgText,
-        }),
-      });
-
-      return res.ok;
-    } catch (err) {
-      console.error("Send error:", err);
-      return false;
-    }
-  };
-
-  // Nickname screen
-  if (!nickname) {
-    return (
-      <div style={{ padding: 20 }}>
-        <h2>Enter your nickname</h2>
-        <input
-          value={tempName}
-          onChange={(e) => setTempName(e.target.value)}
-          placeholder="Your nickname..."
-        />
-        <button
-          onClick={() => tempName.trim() && setNickname(tempName.trim())}
-        >
-          Join Chat
-        </button>
-      </div>
-    );
-  }
-
+export default function App() {
   return (
-    <Chat
-      nickname={nickname}
-      messages={messages}
-      onSend={sendMessage}
-    />
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+
+          {/* Protected section */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/profile" element={<Profile />} />
+            {/* <Route path="/" element={<Feed />} /> */}
+            <Route path="/" element={<Navigate to="/profile" replace />} />
+          </Route>
+
+          {/* fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
-
-export default App;

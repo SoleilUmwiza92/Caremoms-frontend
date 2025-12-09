@@ -34,16 +34,12 @@ const Sidebar = () => {
         </button>
       </div>
 
-{/*       <div className="sidebar-section"> */}
-{/*         <h3>Topics</h3> */}
-{/*         <div className="topic-tags"> */}
-{/*           <span className="tag">#Pregnancy</span> */}
-{/*           <span className="tag">#NewMom</span> */}
-{/*           <span className="tag">#Toddler</span> */}
-{/*           <span className="tag">#Health</span> */}
-{/*           <span className="tag">#Nutrition</span> */}
-{/*         </div> */}
-{/*       </div> */}
+      <div className="sidebar-section">
+        <h3>Topics</h3>
+        <div className="sidebar">
+              {/* Future: rooms, private chats, mom groups */}
+        </div>
+      </div>
     </aside>
   );
 };

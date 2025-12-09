@@ -1,0 +1,21 @@
+.chat-message {
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.my-message {
+  background: #ffe5ec;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #d32f2f;
+}
