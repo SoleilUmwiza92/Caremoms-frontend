@@ -30,12 +30,12 @@ export async function authFetch(path, options = {}) {
 
 // Sync Supabase → Spring Boot user
 export function syncUserFromSupabase() {
-  return authFetch("/auth/sync", { method: "POST" });
+  return authFetch("/auth/validate", { method: "POST" });
 }
 
 // Get logged-in backend user
 export function getCurrentUser() {
-  return authFetch("/users/me");
+  return authFetch("/users/me", { method: "GET" });
 }
 
 // Update user profile
