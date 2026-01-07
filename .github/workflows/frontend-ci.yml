@@ -18,12 +18,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Debug folder structure
+        run: ls -R .
+
       - name: Use Node.js 18
         uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: "npm"
-          cache-dependency-path: "Caremoms-frontend/package-lock.json"
+          cache-dependency-path: "Caremoms-frontend/**/package-lock.json"
 
       - name: Install dependencies
         working-directory: ./Caremoms-frontend
@@ -72,7 +75,7 @@ jobs:
         with:
           sarif_file: trivy-results.sarif
 
-      # Secret scanning (repo-level)
+      # --- Secret scanning ---
       - name: Secret scan (gitleaks)
         uses: gitleaks/gitleaks-action@v2
         with:
