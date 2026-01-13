@@ -1,10 +1,14 @@
-name: Frontend CI & Docker
+name: Frontend CI, Docker & Security
 
 on:
   push:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+
+permissions:
+  contents: read
+  security-events: write
 
 jobs:
   build-frontend:
@@ -22,11 +26,15 @@ jobs:
         with:
           node-version: 18
           cache: "npm"
-          cache-dependency-path: "Caremoms-frontend/package-lock.json"
+          cache-dependency-path: "Caremoms-frontend/**/package-lock.json"
 
       - name: Install dependencies
         working-directory: ./Caremoms-frontend
         run: npm ci
+
+      - name: Dependency vulnerability scan (npm audit)
+        working-directory: ./Caremoms-frontend
+        run: npm audit --audit-level=high
 
       - name: Run tests
         working-directory: ./Caremoms-frontend
@@ -35,3 +43,54 @@ jobs:
       - name: Build frontend
         working-directory: ./Caremoms-frontend
         run: npm run build
+
+      # --- Dockerfile security checks ---
+      - name: Lint Dockerfile (hadolint)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Caremoms-frontend/Dockerfile
+
+      - name: IaC/Docker misconfig scan (Checkov)
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          file: Caremoms-frontend/Dockerfile
+
+      # --- Build image (local) ---
+      - name: Build Docker image
+        run: |
+          docker build -t caremoms-frontend:${{ github.sha }} ./Caremoms-frontend
+
+      # --- Image vulnerability scan ---
+      - name: Scan image for vulnerabilities (Trivy)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: caremoms-frontend:${{ github.sha }}
+          format: "sarif"
+          output: "trivy-results.sarif"
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+
+      # --- Secret scanning ---
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: detect --no-git --redact --verbose
+
+  codeql:
+    name: CodeQL (JS/TS)
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+      - uses: github/codeql-action/analyze@v3
