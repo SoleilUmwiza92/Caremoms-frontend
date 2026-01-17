@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  process.env.REACT_APP_API_URL || "https://caremoms.up.railway.app/api";
+  process.env.REACT_APP_BACKEND_BASE_URL || "https://caremoms.up.railway.app/api";
 
 export async function authFetch(path, options = {}) {
   const token = localStorage.getItem("supabaseToken");
@@ -29,7 +29,7 @@ export async function authFetch(path, options = {}) {
 }
 
 // Sync Supabase → Spring Boot user
-export function syncUserFromSupabase() {
+export function syncUserFromSupabase(data) {
   return authFetch("/auth/validate", { method: "POST" });
 }
 
@@ -37,6 +37,13 @@ export function syncUserFromSupabase() {
 export function getCurrentUser() {
   return authFetch("/users/me", { method: "GET" });
 }
+
+export function saveUserProfile(data) {
+  return authFetch("/users/me", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  }
 
 // Update user profile
 export function updateCurrentUserProfile(data) {

@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: ["main"]
 
+concurrency:
+  group: frontend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   security-events: write
@@ -32,6 +36,9 @@ jobs:
         working-directory: ./Caremoms-frontend
         run: npm ci
 
+      # ---------------------------
+      # Dependency vulnerability scanning (FAILS on HIGH+)
+      # ---------------------------
       - name: Dependency vulnerability scan (npm audit)
         working-directory: ./Caremoms-frontend
         run: npm audit --audit-level=high
@@ -44,7 +51,9 @@ jobs:
         working-directory: ./Caremoms-frontend
         run: npm run build
 
-      # --- Dockerfile security checks ---
+      # ---------------------------
+      # Dockerfile security checks
+      # ---------------------------
       - name: Lint Dockerfile (hadolint)
         uses: hadolint/hadolint-action@v3.1.0
         with:
@@ -55,32 +64,40 @@ jobs:
         with:
           file: Caremoms-frontend/Dockerfile
 
-      # --- Build image (local) ---
+      # ---------------------------
+      # Build container + scan it (FAILS on HIGH/CRITICAL)
+      # ---------------------------
       - name: Build Docker image
-        run: |
-          docker build -t caremoms-frontend:${{ github.sha }} ./Caremoms-frontend
+        run: docker build -t caremoms-frontend:${{ github.sha }} ./Caremoms-frontend
 
-      # --- Image vulnerability scan ---
-      - name: Scan image for vulnerabilities (Trivy)
+      - name: Scan image for vulnerabilities (Trivy) - fail on HIGH/CRITICAL
         uses: aquasecurity/trivy-action@0.24.0
         with:
           image-ref: caremoms-frontend:${{ github.sha }}
           format: "sarif"
           output: "trivy-results.sarif"
           vuln-type: "os,library"
-          severity: "CRITICAL,HIGH"
+          severity: "HIGH,CRITICAL"
+          ignore-unfixed: true
+          exit-code: "1"
 
       - name: Upload Trivy results to GitHub Security tab
+        if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-results.sarif
 
-      # --- Secret scanning ---
+      # ---------------------------
+      # Secret scanning
+      # ---------------------------
       - name: Secret scan (gitleaks)
         uses: gitleaks/gitleaks-action@v2
         with:
-          args: detect --no-git --redact --verbose
+          args: detect --redact --verbose
 
+  # ---------------------------
+  # SAST: CodeQL for JS/TS
+  # ---------------------------
   codeql:
     name: CodeQL (JS/TS)
     runs-on: ubuntu-latest
@@ -90,7 +107,9 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v4
+
       - uses: github/codeql-action/init@v3
         with:
           languages: javascript
+
       - uses: github/codeql-action/analyze@v3
