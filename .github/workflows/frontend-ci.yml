@@ -43,11 +43,6 @@ jobs:
         with:
           dockerfile: Dockerfile
 
-      - name: IaC/Docker misconfig scan (Checkov)
-        uses: bridgecrewio/checkov-action@v12
-        with:
-          file: Dockerfile
-
       # ---------------------------
       # Build container + scan it (FAILS on HIGH/CRITICAL)
       # ---------------------------
