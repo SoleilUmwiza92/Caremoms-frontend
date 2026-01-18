@@ -75,7 +75,7 @@ export default function Profile() {
            let data = user;
            await deleteUserAccount(data, accessToken);
            setFeedback('Account deleted successfully.');
-           const { error } = await supabase.auth.signOut();
+           await supabase.auth.signOut();
            window.location.href = "/login";
          } catch (err) {
            console.error(err);
