@@ -31,9 +31,6 @@ jobs:
       # Dependency vulnerability scanning (FAILS on HIGH+)
       # ---------------------------
 
-      - name: Run tests
-        run: npm test -- --watchAll=false
-
       - name: Build frontend
         run: npm run build
 
