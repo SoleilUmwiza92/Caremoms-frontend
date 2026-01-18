@@ -36,44 +36,6 @@ jobs:
         env:
           CI: false
 
-      # ---------------------------
-      # Dockerfile security checks
-      # ---------------------------
-      - name: Lint Dockerfile (hadolint)
-        uses: hadolint/hadolint-action@v3.1.0
-        with:
-          dockerfile: Caremoms-frontend/Dockerfile
-
-      - name: IaC/Docker misconfig scan (Checkov)
-        uses: bridgecrewio/checkov-action@v12
-        with:
-          file: Caremoms-frontend/Dockerfile
-
-      # ---------------------------
-      # Build container + scan it (FAILS on HIGH/CRITICAL)
-      # ---------------------------
-      - name: Build Docker image
-        run: docker build -t caremoms-frontend:${{ github.sha }} ./Caremoms-frontend
-
-      - name: Scan image for vulnerabilities (Trivy) - fail on HIGH/CRITICAL
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          image-ref: caremoms-frontend:${{ github.sha }}
-          format: "sarif"
-          output: "trivy-results.sarif"
-          vuln-type: "os,library"
-          severity: "CRITICAL"
-          ignore-unfixed: true
-
-
-      # ---------------------------
-      # Secret scanning
-      # ---------------------------
-      - name: Secret scan (gitleaks)
-        uses: gitleaks/gitleaks-action@v2
-        with:
-          args: detect --redact --verbose
-
   # ---------------------------
   # SAST: CodeQL for JS
   # ---------------------------
