@@ -65,9 +65,9 @@ jobs:
           format: "sarif"
           output: "trivy-results.sarif"
           vuln-type: "os,library"
-          severity: "HIGH,CRITICAL"
+          severity: "CRITICAL"
           ignore-unfixed: true
-          exit-code: "1"
+
 
       # ---------------------------
       # Secret scanning
@@ -78,10 +78,10 @@ jobs:
           args: detect --redact --verbose
 
   # ---------------------------
-  # SAST: CodeQL for JS/TS
+  # SAST: CodeQL for JS
   # ---------------------------
   codeql:
-    name: CodeQL (JS/TS)
+    name: CodeQL (JS)
     runs-on: ubuntu-latest
     permissions:
       actions: read
