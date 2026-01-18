@@ -31,10 +31,32 @@ jobs:
       # Dependency vulnerability scanning (FAILS on HIGH+)
       # ---------------------------
 
+      - name: Run tests
+        run: npm test -- --watchAll=false
+
       - name: Build frontend
         run: npm run build
         env:
           CI: false
+
+      # ---------------------------
+      # Dockerfile security checks
+      # ---------------------------
+      - name: Lint Dockerfile (hadolint)
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+
+      - name: IaC/Docker misconfig scan (Checkov)
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          file: Dockerfile
+
+      # ---------------------------
+      # Build container + scan it (FAILS on HIGH/CRITICAL)
+      # ---------------------------
+      - name: Build Docker image
+        run: docker build -t caremoms-frontend:${{ github.sha }} ./Caremoms-frontend
 
   # ---------------------------
   # SAST: CodeQL for JS
