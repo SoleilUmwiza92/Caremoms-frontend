@@ -31,7 +31,7 @@ jobs:
       # Dependency vulnerability scanning (FAILS on HIGH+)
       # ---------------------------
       - name: Dependency vulnerability scan (npm audit)
-        run: npm audit --audit-level=high
+        run: npm audit
 
       - name: Run tests
         run: npm test -- --watchAll=false
