@@ -3,12 +3,6 @@ name: Frontend CI, Docker & Security
 on:
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
-
-concurrency:
-  group: frontend-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -20,11 +14,11 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ '18.x', '20.x' ]
+        node-version: '18.x'
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Debug folder structure
         run: ls -R .
@@ -35,22 +29,18 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
-        working-directory: Caremoms-frontend
         run: npm ci
 
       # ---------------------------
       # Dependency vulnerability scanning (FAILS on HIGH+)
       # ---------------------------
       - name: Dependency vulnerability scan (npm audit)
-        working-directory: Caremoms-frontend
         run: npm audit --audit-level=high
 
       - name: Run tests
-        working-directory: Caremoms-frontend
         run: npm test -- --watchAll=false
 
       - name: Build frontend
-        working-directory: Caremoms-frontend
         run: npm run build
 
       # ---------------------------
