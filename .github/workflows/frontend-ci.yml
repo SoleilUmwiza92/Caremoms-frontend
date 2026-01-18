@@ -47,7 +47,7 @@ jobs:
       # Build container + scan it (FAILS on HIGH/CRITICAL)
       # ---------------------------
       - name: Build Docker image
-        run: docker build -t caremoms-frontend:${{ github.sha }}
+        run: docker build -t caremoms-frontend:latest .
 
   # ---------------------------
   # SAST: CodeQL for JS
