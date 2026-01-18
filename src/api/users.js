@@ -45,6 +45,11 @@ export function saveUserProfile(data) {
   });
   }
 
+  export function deleteUserAccount(data) {
+      return authFetch("/users/me", {
+      method: "DELETE" });
+  }
+
 // Update user profile
 export function updateCurrentUserProfile(data) {
   return authFetch("/users/me", {

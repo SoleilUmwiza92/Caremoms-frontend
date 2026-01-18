@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { supabase } from "../auth/supabaseClient";
 import {
   Container,
   Box,
   Typography,
   TextField,
+  ButtonGroup,
   Button,
   Stack,
 } from '@mui/material';
@@ -11,16 +13,16 @@ import { LocalizationProvider} from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import useAuth from '../auth/useAuth';
-import { updateCurrentUserProfile, getCurrentUser, saveUserProfile } from '../api/users';
+import { updateCurrentUserProfile, getCurrentUser, saveUserProfile, deleteUserAccount } from '../api/users';
 
 export default function Profile() {
   const { backendUser, accessToken, loading: authLoading } = useAuth();
-
   const [user, setUser] = useState('');
   const [email, setEmail]=useState('');
   const [userName, setUserName]=useState('');
   const [userRole, setRole]=useState('');
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [dob, setDob] = useState('');
 
@@ -50,8 +52,10 @@ export default function Profile() {
       let data = user;
       if(user.id == null){
           await saveUserProfile(data, accessToken);
+          window.location.href = "/chatroom";
       }else{
           await updateCurrentUserProfile(data, accessToken);
+          window.location.href = "/chatroom";
       }
       setFeedback('Profile updated successfully.');
     } catch (err) {
@@ -61,6 +65,25 @@ export default function Profile() {
       setSaving(false);
     }
   };
+
+ const handleDelete = async () => {
+        try {
+           setDeleting(true);
+           setFeedback('');
+           user.role =userRole;
+           user.dob=dob;
+           let data = user;
+           await deleteUserAccount(data, accessToken);
+           setFeedback('Account deleted successfully.');
+           const { error } = await supabase.auth.signOut();
+           window.location.href = "/login";
+         } catch (err) {
+           console.error(err);
+           setFeedback('Failed to delete user account.');
+         } finally {
+           setDeleting(false);
+         }
+     }
 
   if (authLoading) {
     return <div>Loading...</div>;
@@ -107,14 +130,23 @@ export default function Profile() {
                     }}/>
 
           </LocalizationProvider>
-
+          <ButtonGroup variant="outlined">
           <Button
-            variant="contained"
-            onClick={handleSave}
-            disabled={saving}
-          >
-            {saving ? 'Saving...' : 'Save changes'}
-          </Button>
+                      variant="contained"
+                      onClick={handleSave}
+                      disabled={saving}
+                    >
+                      {saving ? 'Saving...' : 'Save changes'}
+                    </Button>
+           <Button
+
+                     color="secondary"
+                     onClick={handleDelete}
+                     disabled={deleting}
+                      >
+                      {deleting ? 'deleting...' : 'Delete account'}
+                      </Button>
+           </ButtonGroup>
 
           {feedback && (
             <Typography variant="body2" color="primary">
